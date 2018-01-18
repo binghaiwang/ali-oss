@@ -11,6 +11,11 @@ module.exports = function(config) {
       'node_modules/co-mocha/co-mocha.js',
       'test/browser/build/tests.js'
     ],
+    client: {
+      mocha: {
+        timeout : 6000
+      }
+    },
     preprocessors: {
       // 'dist/aliyun-oss-sdk.js': ['coverage']
     },

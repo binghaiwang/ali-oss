@@ -804,6 +804,39 @@ describe('browser', function () {
         assert.equal(partNum, 0);
         this.store._uploadPart.restore();
       });
+
+      it('sequence multipartUpload ', function* () {
+        var client = new oss({
+          region: 'oss-cn-hangzhou',
+          accessKeyId: 'YJjHKOKWDWINLKXv',
+          accessKeySecret: '37wFMvLLnqf2EvI5ljhp8WIl2F1l6W',
+          endpoint: '10.101.194.148',
+          bucket: 'test'
+        });
+
+        var fileContent = Array(300 * 1024).fill('a').join('');
+        var file = new File([fileContent], 'object');
+        var name = 'object';
+
+        var result = yield client.multipartUpload(name, file, {
+          partSize: 100 * 1024,
+          sequential: true
+        });
+
+        assert.equal(result.res.status, 200);
+
+        var object = yield client.get(name);
+        assert.equal(object.res.status, 200);
+
+        var fileBuf = new Uint8Array(fileContent.length);
+        for (var i = 0, j = fileContent.length; i < j; ++i) {
+          fileBuf[i] = fileContent.charCodeAt(i);
+        }
+
+        assert.equal(object.content.length, fileBuf.length);
+        // avoid comparing buffers directly for it may hang when generating diffs
+        assert.deepEqual(md5(object.content), md5(fileBuf));
+      });
     });
   });
 
